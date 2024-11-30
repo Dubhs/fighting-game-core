@@ -1,0 +1,165 @@
+let walk = 0
+let latest = null
+
+class Vector {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  add(other) {
+    [this.x, this.y] = [this.x + other.x, this.y + other.y]
+  }
+}
+
+class Character {
+  constructor(x, y, vx, vy) {
+    this.position = new Vector(x, y);
+    this.velocity = new Vector(vx, vy);
+  }
+
+  move() {
+    this.position.add(this.velocity)
+  }
+
+  tick() {
+    if (this.velocity.x > 0) {
+      this.velocity.x -= 0.2
+    console.log(this.velocity.x)
+    } else if (this.velocity.x < 0) {
+      this.velocity.x += 0.2
+    }
+    if (this.velocity.y > 0) {
+      this.velocity.y -= 0.2
+    console.log('y: ', this.velocity.y)
+    } else if (this.velocity.y < 0) {
+      this.velocity.y += 0.2
+    }
+  }
+}
+
+character = new Character(0, 0, 6, 14.325)
+
+character.move()
+
+class Keyboard {
+
+}
+
+let stateMachine = {
+  'a': { 
+    'plane': 'h',
+    'speed': -1,
+    'state': false,
+    'x': () => {
+      console.log(this.state)
+      if (this.state == true) {
+        console.log(self.state);
+        return this.speed
+      } else {return 0}
+    }
+  },
+  'd': { 
+    'plane': 'h',
+    'speed': 1,
+    'state': false,
+    'x': () => {
+      
+      if (this.state == true) {
+        console.log(self['state']);
+        return this.speed
+      } else {return 0}
+    }, 
+  },
+  ' ': {
+    'plane': 'v',
+    'speed': 1,
+    'state': false,
+    'x': () => {
+      
+      if (this.state == true) {
+        console.log(self['state']);
+        return this.speed
+      } else {return 0}
+    }, 
+  }
+}
+
+window.addEventListener('keydown', (e) => {
+  let state = stateMachine[e.key].state
+  if (state !== true) {
+    stateMachine[e.key].state = true
+    console.log(
+      "state-of-key: ",
+      e.key,
+      "to: ",
+      stateMachine[e.key].state
+    )
+  }
+})
+
+window.addEventListener('keyup', (e) => {
+  let state = stateMachine[e.key].state
+  if (state !== false) {
+    stateMachine[e.key].state = false
+    console.log(
+      "state-of-key: ",
+      e.key,
+      "to: ",
+      stateMachine[e.key].state
+    )
+  }
+})
+
+
+
+
+function render(time) {
+  canvas.width = width;
+  canvas.height = height;
+
+  for (key in stateMachine) {
+    let item = stateMachine[key]
+    if (item.state == true && item.plane == 'h') {
+      character.velocity.x += item.speed
+    } else if (item.state == true && item.plane == 'v') {
+      character.velocity.y -= item.speed
+    }
+  }
+
+  character.move()
+  character.tick()
+  
+  //draw here
+  ctx.clearRect(0, 0, width, height)
+  ctx.fillRect(character.position.x, character.position.y, 100, 100)
+
+  //walk = 0
+
+  requestAnimationFrame(render)
+}
+requestAnimationFrame(render)
+
+
+/*console.log(stateMachine.a.x)
+stateMachine.a.x()
+
+console.log(keymap['a'])
+function handleKeyDown(e) {
+  walk = walk + keymap[e.key]
+  if (up == true) {
+    return
+  }
+  requestAnimationFrame(() => handleKeyDown(e))
+}
+let up = false
+onkeyup = (e) => { up = true }
+onkeydown = (event) => {
+  console.log(event.key, " : ", keymap[event.key])
+  if (event.key in keymap) {
+    up = false;
+    requestAnimationFrame(() => handleKeyDown(event));
+  } else {
+    return
+  }
+};*/
