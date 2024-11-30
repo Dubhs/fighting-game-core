@@ -1,4 +1,6 @@
 class Character {
+  static __renderMethods = []; // Store method references
+
   constructor(position, velocity, color) {
     this.position = position;
     this.velocity = velocity;
@@ -10,37 +12,29 @@ class Character {
   }
 
   jump() {
-    if (this.jumpState && !this.jumpLock) {
-      this.jumpLock = true;
-      this.position.y += this.jumpVelocity;
-
-      setTimeout(() => {
-        this.jumpState = false;
-      }, 100);
-
-      setTimeout(() => {
-        this.jumpLock = false;
-      }, 550);
-    }
+    if (this.jumpState == true) {
+      this.jumpLock = true
+    this.position.y += this.jumpVelocity
+    setTimeout(() => {
+      this.jumpState = false
+    }, 100)
+    setTimeout(() => {
+      this.jumpLock = false
+    }, 550)
+  }
   }
 
   tick(gravity) {
-    if (this.jumpState) {
-      this.jump();
+    if (this.jumpState == true) {
+      this.jump()
     }
-
-    if (
-      this.position.y <= window.innerHeight - 100 &&
-      this.position.y >= 0
-    ) {
-      this.position.y += gravity;
-    } else if (this.position.y < 0) {
-      this.position.y = 0;
-    }
-
+    if (this.position.y <= window.innerHeight - 100 && this.position.y >= 0){
+      this.position.y += gravity
+    } else if (this.position.y <= 0) { this.position.y = 0}
     this.position.x += this.velocity.x;
-    this.velocity.x = 0;
-    this.velocity.y = 0;
+    this.position.y += this.velocity.y;
+    this.velocity.x = 0
+    this.velocity.y = 0
   }
 
   draw() {
@@ -70,31 +64,54 @@ let activeKeys = new Set(); // Track currently pressed keys
 let lastKey = null; // Track the last active key
 
 const keyboardState = {
-  a: { plane: "h", speed: -4.5, state: false },
-  d: { plane: "h", speed: 4.5, state: false },
-  w: { plane: "v", speed: -100, state: false },
+  'a': {
+    plane: 'h',
+    speed: -4.5,
+    state: false,
+    x() {
+      return this.state ? this.speed : 0;
+    },
+  },
+  'd': {
+    plane: 'h',
+    speed: 4.5,
+    state: false,
+    x() {
+      return this.state ? this.speed : 0;
+    },
+  },
+  'w': {
+    plane: 'v',
+    speed: -100,
+    state: false,
+    x() {
+      return this.state ? this.speed : 0;
+    },
+  },
 };
 
-// Keydown Event Handler
-window.addEventListener("keydown", (e) => {
+// **Keydown Event Handler**
+window.addEventListener('keydown', (e) => {
   if (keyboardState[e.key]) {
     if (!keyboardState[e.key].state) {
-      keyboardState[e.key].state = true;
-      if (keyboardState[e.key].plane === "h") {
-        activeKeys.add(e.key);
-        lastKey = e.key;
+      keyboardState[e.key].state = true; // Set state to active
+      if (keyboardState[e.key].plane === 'h') {
+        activeKeys.add(e.key); // Add key to activeKeys
+        lastKey = e.key; // Update last active key
       }
     }
   }
 });
 
-// Keyup Event Handler
-window.addEventListener("keyup", (e) => {
+// **Keyup Event Handler**
+window.addEventListener('keyup', (e) => {
   if (keyboardState[e.key]) {
-    keyboardState[e.key].state = false;
-    activeKeys.delete(e.key);
+    keyboardState[e.key].state = false; // Set state to inactive
+    activeKeys.delete(e.key); // Remove key from activeKeys
 
+    // Update lastKey only if the released key matches the current lastKey
     if (lastKey === e.key) {
+      // If other keys are active, pick the most recent one
       lastKey = Array.from(activeKeys).pop() || null;
     }
   }
@@ -109,15 +126,17 @@ window.addEventListener("keypress", (e) => {
 
 class Game {
   constructor(characters) {
-    this.gravity = 6;
+    this.gravity = 6
     this.characters = characters;
   }
 
   render() {
     canvas.width = width;
     canvas.height = height;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+    for (const character of Object.values(this.characters)) {
+      character.tick(this.gravity)
+    }
     for (const character of Object.values(this.characters)) {
       character.tick(this.gravity);
       character.draw();
@@ -128,13 +147,13 @@ class Game {
     const loop = () => {
       for (const key in keyboardState) {
         const item = keyboardState[key];
-        if (item.state && item.plane === "h" && lastKey === key) {
+        if (item.state && item.plane === 'h' && lastKey === key) {
           this.characters.player.velocity.x = item.speed;
           this.characters.enemy.velocity.x -= item.speed;
-        } else if (item.state && item.plane === "v") {
-          if (!this.characters.player.jumpLock) {
-            this.characters.player.jumpState = true;
-            this.characters.enemy.jumpState = true;
+        } else if (item.state && item.plane === 'v') {
+          if (this.characters.player.jumpLock == false) {
+            this.characters.player.jumpState = true
+            this.characters.enemy.jumpState = true
           }
         }
       }
@@ -146,19 +165,12 @@ class Game {
 }
 
 
+
+
 // Initialize game and characters
 const game = new Game({
-  player: new Character(
-    { x: 0, y: window.innerHeight - 150 },
-    { x: 1, y: 0 },
-    "blue"
-  ),
-  enemy: new Character(
-    { x: window.innerWidth - 50, y: window.innerHeight - 150 },
-    { x: -1, y: 0 },
-    "red"
-  ),
+  player: new Character({ x: 0, y: window.innerHeight - 150 }, { x: 1, y: 0 }, 'blue'),
+  enemy: new Character({ x: window.innerWidth - 50, y: window.innerHeight - 150 }, { x: -1, y: 0 }, 'red'),
 });
-
 // Start the game
 game.start();
