@@ -1,0 +1,16 @@
+var img = new Image();
+img.src = 'IDLE.png'
+
+
+
+scale = 3
+
+function loop() {
+  ctx.drawImage(img, 0, 0, 960, 96, 0, 0, 960 * 2, 96 * 2)
+  console.log('done')
+  requestAnimationFrame(loop)
+}
+
+img.onload = function() {
+  loop();
+};

@@ -50,7 +50,6 @@ class Character {
   }
 
   draw() {
-    // clear
     ctx.fillStyle = this.color;
     ctx.fillRect(this.position.x, this.position.y, 50, 100);
 
@@ -61,6 +60,7 @@ class Character {
       if(this.name == 'player') {
       ctx.fillRect(this.position.x + 50, this.position.y, 75, 25);
       }
+      // TODO move this logic out of draw
       // check hit, take health and log
       if (this.opononent.position.x < this.position.x + 125 && this.name == 'player') {
         this.opononent.health -= 1
@@ -70,7 +70,7 @@ class Character {
       if (this.name == 'enemy') {
         ctx.fillRect(this.position.x - 75, this.position.y, 75, 25);
       }
-    
+      // TODO move this logic out of draw
       // check hit, take health and log
       // there has to be the depth of the player added to this one because
       // its hitting back and we need its hitline to be the front of the oponent
@@ -101,6 +101,7 @@ const keyboardState = {
     plane: 'h',
     speed: -7,
     state: false,
+    // TODO implement the use of these functions or remove them if we stick with a different way
     execute() {
       return this.state ? this.speed : 0;
     },
@@ -109,6 +110,7 @@ const keyboardState = {
     plane: 'h',
     speed: 7,
     state: false,
+    // TODO implement the use of these functions or remove them if we stick with a different way
     execute() {
       return this.state ? this.speed : 0;
     },
@@ -117,6 +119,7 @@ const keyboardState = {
     plane: 'v',
     speed: -100,
     state: false,
+    // TODO implement the use of these functions or remove them if we stick with a different way
     execute() {
       return this.state ? this.speed : 0;
     },
@@ -131,6 +134,7 @@ const keyboardStateEnemy = {
     plane: 'h',
     speed: -7,
     state: false,
+    // TODO implement the use of these functions or remove them if we stick with a different way
     execute() {
       return this.state ? this.speed : 0;
     },
@@ -139,6 +143,7 @@ const keyboardStateEnemy = {
     plane: 'h',
     speed: 7,
     state: false,
+    // TODO implement the use of these functions or remove them if we stick with a different way
     execute() {
       return this.state ? this.speed : 0;
     },
@@ -147,6 +152,7 @@ const keyboardStateEnemy = {
     plane: 'v',
     speed: -100,
     state: false,
+    // TODO implement the use of these functions or remove them if we stick with a different way
     execute() {
       return this.state ? this.speed : 0;
     },
@@ -231,13 +237,17 @@ class Game {
       if (character.health > 0) {
         character.draw();
       }
-      if (character.name == 'player'&& character.health > 0) {
+      // health bar logic and rendering
+      let widthOfBar = ((canvas.width / 2) / 100)
+      // player 1
+      if (character.name == 'player' && character.health > 0) {
         ctx.fillStyle = 'blue'
-        ctx.fillRect(10, 10, character.health, 25)
+        ctx.fillRect(10, 10, (character.health * widthOfBar) - 15, 25)
       }
-      else if (character.name == 'enemy'&& character.health > 0) {
+      // player 2
+      else if (character.name == 'enemy' && character.health > 0) {
         ctx.fillStyle = 'red'
-        ctx.fillRect(canvas.width - 110, 10, character.health, 25)
+        ctx.fillRect(canvas.width - 10, 10, -((character.health * widthOfBar) - 15), 25)
       }
       if (character.health <= 0) {
         console.log(character.opononent.name, ' wins!!')
@@ -247,36 +257,58 @@ class Game {
 
   start() {
     const loop = () => {
+    // loop thru key states and update velocity
+      //
+      //player 1
       for (const key in keyboardState) {
         const item = keyboardState[key];
+        // for horizontal movement
         if (item.state && item.plane === 'h' && lastKey === key) {
           this.characters.player.velocity.x = item.speed;
-        } else if (item.state && item.plane === 'v') {
+        }
+        // for jump
+        else if (item.state && item.plane === 'v') {
           if (this.characters.player.jumpLock == false) {
             this.characters.player.jumpState = true
           }
         }
       }
+      //player 2
       for (const key in keyboardStateEnemy) {
         const itemEnemy = keyboardStateEnemy[key];
+        // for horizontal movement
         if (itemEnemy.state && itemEnemy.plane === 'h' && lastKeyEnemy === key) {
           this.characters.enemy.velocity.x += itemEnemy.speed;
-        } else if (itemEnemy.state && itemEnemy.plane === 'v') {
+        }
+        // for jump
+        else if (itemEnemy.state && itemEnemy.plane === 'v') {
           if (this.characters.player.jumpLock == false) {
             this.characters.enemy.jumpState = true
           }
         }
       }
       this.render();
+      // recurse
       requestAnimationFrame(loop);
     };
     loop();
   }
 }
 
-const game = new Game({
-  player: new Character({ x: 0, y: window.innerHeight - 150 }, { x: 1, y: 0 }, 'blue', 'player'),
-  enemy: new Character({ x: window.innerWidth - 50, y: window.innerHeight - 150 }, { x: -1, y: 0 }, 'red', 'enemy'),
+const game = new Game(
+  {
+    player: new Character(
+      { x: 0, y: window.innerHeight - 150 },
+      { x: 1, y: 0 },
+      'blue',
+      'player',
+    ),
+    enemy: new Character(
+      { x: window.innerWidth - 50, y: window.innerHeight - 150 },
+      { x: -1, y: 0 },
+      'red',
+      'enemy',
+    ),
 });
 
 game.characters.player.setOpponent(game.characters.enemy)
